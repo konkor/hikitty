@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2018 Kostiantyn Korienkov <kapa76@gmail.com>
  *
- * This file is part of you2ber Gnome shell extension.
+ * This file is part of hi-kitty Gnome shell extension.
  *
  * hi-kitty is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -30,6 +30,8 @@ const Lang = imports.lang;
 const APPDIR = get_appdir ();
 imports.searchPath.unshift(APPDIR);
 
+const APPNAME = "Hi, KITTY :)";
+
 let theme_gui = APPDIR + "/data/theme/gtk.css";
 let cssp = null;
 let settings = null;
@@ -40,7 +42,7 @@ var KittyApplication = new Lang.Class ({
     Extends: Gtk.Application,
 
     _init: function (args) {
-        GLib.set_prgname ("Hi, KITTY :)");
+        GLib.set_prgname (APPNAME);
         this.parent ({
             application_id: "org.konkor.kitty.application",
             flags: Gio.ApplicationFlags.HANDLES_OPEN
@@ -63,31 +65,13 @@ var KittyApplication = new Lang.Class ({
     },
 
     vfunc_activate: function() {
-        window.connect("destroy", () => {
-            //remove all glib events
-        });
+        window.connect("destroy", () => {});
         window.show_all ();
         window.present ();
-        //this.picture.pixbuf = GdkPixbuf.Pixbuf.new_from_stream (dis, null);
-//        try {
-//        let f = Gio.File.new_for_uri ("http://thecatapi.com/api/images/get?type=gif&size=med&ts=" + new Date().getTime());
-//        let dis = new Gio.DataInputStream ({ base_stream: f.read (null) });
-//        //this.picture.pixbuf_animation = GdkPixbuf.PixbufAnimation.new_from_stream (dis, null);
-//        //window.resize (32, 32);
-//        GdkPixbuf.PixbufAnimation.new_from_stream_async (dis, null, (o,res)=>{
-//            this.picture.pixbuf_animation = GdkPixbuf.PixbufAnimation.new_from_stream_finish (res);
-//            window.resize (32, 32);
-//        });
-//        } catch (e) {print (e);}
-        fetch ("http://thecatapi.com/api/images/get?type=gif&size=med&ts=" +
-               new Date().getTime(),null,null,Lang.bind (this, function (pb, res) {
-            if (res != 200) return;
-            print ("OK ");
-            //this.picture = Gtk.Image.new_from_animation (pb);
-            //this.picture.clear();
-            this.picture.pixbuf_animation = pb;
-            window.resize (32, 32);
-        }));
+        try {
+            this.fetch ("http://thecatapi.com/api/images/get?type=gif&size=med&ts=" +
+               new Date().getTime(), null,null,null);
+        } catch (e) {print (e);}
     },
 
     build: function() {
@@ -100,39 +84,33 @@ var KittyApplication = new Lang.Class ({
         window.get_style_context ().add_class ("main");
         this.hb = new Gtk.HeaderBar ();
         this.hb.set_show_close_button (true);
+        this.hb.title = APPNAME;
         window.set_titlebar (this.hb);
         let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
         window.add (box);
         this.picture = Gtk.Image.new_from_file (APPDIR + "/data/icons/get.gif");
         if (this.picture) box.pack_start (this.picture,true,true,0);
+
         window.connect ("focus-out-event", ()=>{app.quit();});
-        
+    },
+
+    fetch: function (url, agent, headers, callback) {
+        callback = callback || null;
+        agent = agent || "Hi, KITTY:) ver." + 1;
+
+        let session = new Soup.Session ({ user_agent: agent });
+        session.use_thread_context = true;
+        let request = session.request (url);
+        request.send_async (null, Lang.bind (this, function (o, res) {
+            try {
+                let stream = request.send_finish (res);
+                this.picture.pixbuf_animation = GdkPixbuf.PixbufAnimation.new_from_stream (stream, null);
+                window.resize (32, 32);
+            } catch (e) {print (e);}
+            if (callback) callback (res);
+        }));
     }
 });
-
-
-function fetch (url, agent, headers, callback) {
-    callback = callback || null;
-    agent = agent || "Hi, KITTY:) ver." + 1;
-
-    let session = new Soup.SessionAsync({ user_agent: agent });
-    Soup.Session.prototype.add_feature.call (session, new Soup.ProxyResolverDefault());
-    let request = Soup.Message.new ("GET", url);
-    if (headers) headers.forEach (h=>{
-        request.request_headers.append (h[0], h[1]);
-    });
-    session.queue_message (request, (source, message) => {
-        let pb = null;
-        if (message.status_code == 200) {
-            print ("Recived:"+message.response_body.flatten().length);
-            let buf = message.response_body.flatten().copy().get_data();
-            let mis = Gio.MemoryInputStream.new_from_data (buf, null);
-            pb = GdkPixbuf.PixbufAnimation.new_from_stream (mis, null);
-        }
-        if (callback)
-            callback (pb, message.status_code);
-    });
-}
 
 function get_css_provider () {
     let cssp = new Gtk.CssProvider ();
@@ -162,9 +140,9 @@ function getCurrentFile () {
 function get_appdir () {
     let s = getCurrentFile ()[1];
     if (GLib.file_test (s + "/prefs.js", GLib.FileTest.EXISTS)) return s;
-    s = GLib.get_home_dir () + "/.local/share/gnome-shell/extensions/cpufreq@konkor";
+    s = GLib.get_home_dir () + "/.local/share/gnome-shell/extensions/hikitty@konkor";
     if (GLib.file_test (s + "/prefs.js", GLib.FileTest.EXISTS)) return s;
-    s = "/usr/share/gnome-shell/extensions/cpufreq@konkor";
+    s = "/usr/share/gnome-shell/extensions/hikitty@konkor";
     if (GLib.file_test (s + "/prefs.js", GLib.FileTest.EXISTS)) return s;
     throw "Installation not found...";
     return s;

@@ -1,10 +1,103 @@
-<svg xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns="http://www.w3.org/2000/svg" height="48" width="48" version="1.1" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="0 0 12.699999 12.7">
- <path d="m10.8 6.21s1.21-3.86 0.694-4.44c-0.5-0.43-4.51 2.3-4.51 2.3z" stroke-opacity=".933" fill-rule="evenodd" fill-opacity=".729" stroke="#d6d6d6" stroke-width="1.17" fill="#222"/>
- <path d="m1.88 6.3s-1.21-3.86-0.694-4.44c0.482-0.444 4.47 2.15 4.47 2.15z" stroke-opacity=".933" fill-rule="evenodd" fill-opacity=".729" stroke="#d6d6d6" stroke-width="1.17" fill="#222"/>
- <ellipse rx="5.13" ry="4.17" cy="7.63" cx="6.36" fill="#d6d6d6"/>
- <g fill="#171717" fill-opacity=".944">
-  <ellipse rx="1.06" ry="1.07" cy="6.13" cx="4"/>
-  <ellipse rx=".926" ry=".893" cy="6.16" cx="8.66"/>
-  <ellipse rx=".661" ry=".553" cy="8.1" cx="6.24"/>
- </g>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   height="48"
+   width="48"
+   version="1.1"
+   viewBox="0 0 12.699999 12.7"
+   id="svg16"
+   sodipodi:docname="kitty.svg"
+   inkscape:export-filename="/home/kapa/projects/hikitty@konkor/data/icons/kitty.png"
+   inkscape:export-xdpi="40"
+   inkscape:export-ydpi="40"
+   inkscape:version="0.92.1 r15371">
+  <metadata
+     id="metadata22">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs20" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="754"
+     inkscape:window-height="520"
+     id="namedview18"
+     showgrid="false"
+     inkscape:showpageshadow="false"
+     inkscape:zoom="4.9166667"
+     inkscape:cx="-5.6949153"
+     inkscape:cy="23.59322"
+     inkscape:window-x="443"
+     inkscape:window-y="268"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg16" />
+  <path
+     d="m10.8 6.21s1.21-3.86 0.694-4.44c-0.5-0.43-4.51 2.3-4.51 2.3z"
+     stroke-opacity=".933"
+     fill-rule="evenodd"
+     fill-opacity=".729"
+     stroke="#d6d6d6"
+     stroke-width="1.17"
+     fill="#222"
+     id="path2" />
+  <path
+     d="m1.88 6.3s-1.21-3.86-0.694-4.44c0.482-0.444 4.47 2.15 4.47 2.15z"
+     stroke-opacity=".933"
+     fill-rule="evenodd"
+     fill-opacity=".729"
+     stroke="#d6d6d6"
+     stroke-width="1.17"
+     fill="#222"
+     id="path4" />
+  <ellipse
+     rx="5.13"
+     ry="4.17"
+     cy="7.63"
+     cx="6.36"
+     fill="#d6d6d6"
+     id="ellipse6" />
+  <g
+     fill="#171717"
+     fill-opacity=".944"
+     id="g14">
+    <ellipse
+       rx="1.06"
+       ry="1.07"
+       cy="6.13"
+       cx="4"
+       id="ellipse8" />
+    <ellipse
+       rx=".926"
+       ry=".893"
+       cy="6.16"
+       cx="8.66"
+       id="ellipse10" />
+    <ellipse
+       rx=".661"
+       ry=".553"
+       cy="8.1"
+       cx="6.24"
+       id="ellipse12" />
+  </g>
 </svg>
