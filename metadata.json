@@ -1,0 +1,16 @@
+{
+  "description": "Hi, KITTY :)\n\n It's a simple, funny and antistress application for whole famaly. Enjoy!\n\nFor more information and how-to see README.md",
+  "name": "hikitty",
+  "settings-schema": "org.konkor.hikitty",
+  "shell-version": [
+    "3.14",
+    "3.16",
+    "3.18",
+    "3.20",
+    "3.22",
+    "3.24",
+    "3.26"
+  ],
+  "url": "https://github.com/konkor/hikitty",
+  "uuid": "hikitty@konkor"
+}
