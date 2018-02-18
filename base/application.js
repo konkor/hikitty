@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2018 Kostiantyn Korienkov <kapa76@gmail.com>
  *
- * This file is part of hi-kitty Gnome shell extension.
+ * This file is part of hi-kitty appllication.
  *
  * hi-kitty is free software: you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -31,6 +31,7 @@ const APPDIR = get_appdir ();
 imports.searchPath.unshift(APPDIR);
 
 const APPNAME = "Hi, KITTY :)";
+const URL = "http://thecatapi.com/api/images/get?type=gif&size=med&ts=";
 
 let theme_gui = APPDIR + "/data/theme/gtk.css";
 let cssp = null;
@@ -68,13 +69,16 @@ var KittyApplication = new Lang.Class ({
         window.connect("destroy", () => {});
         window.show_all ();
         window.present ();
-        try {
-            this.fetch ("http://thecatapi.com/api/images/get?type=gif&size=med&ts=" +
-               new Date().getTime(), null,null,null);
+        this.update ();
+    },
+
+    update: function() {
+        try { this.fetch (URL + new Date().getTime(), null,null,null);
         } catch (e) {print (e);}
     },
 
     build: function() {
+        this.build_menu ();
         window.window_position = Gtk.WindowPosition.MOUSE;
         cssp = get_css_provider ();
         if (cssp) {
@@ -83,15 +87,52 @@ var KittyApplication = new Lang.Class ({
         }
         window.get_style_context ().add_class ("main");
         this.hb = new Gtk.HeaderBar ();
-        this.hb.set_show_close_button (true);
+        this.hb.set_show_close_button (false);
         this.hb.title = APPNAME;
         window.set_titlebar (this.hb);
         let box = new Gtk.Box ({orientation:Gtk.Orientation.HORIZONTAL});
         window.add (box);
+        let ebox = new Gtk.EventBox ();
+        box.pack_start (ebox,true,true,0);
         this.picture = Gtk.Image.new_from_file (APPDIR + "/data/icons/get.gif");
-        if (this.picture) box.pack_start (this.picture,true,true,0);
+        if (this.picture) ebox.add (this.picture);
 
-        window.connect ("focus-out-event", ()=>{app.quit();});
+        window.connect ("focus-out-event", ()=>{if (!this.menu.visible) app.quit();});
+        ebox.connect ("button-press-event", Lang.bind (this, function (o, event) {
+            let [,button] = event.get_button();
+            if (button == 3)
+                this.menu.popup (null, null, null, event.get_button(), event.get_time());
+        }));
+    },
+
+    build_menu: function () {
+        this.menu = new Gtk.Menu ();
+        let mi = Gtk.MenuItem.new_with_label ("Update");
+        mi.tooltip_text = "Get a new one kitty!";
+        this.menu.add (mi);
+        mi.connect ("activate", Lang.bind (this, function (o) {
+        this.update ();
+        }));
+        /*this.menu.add (new Gtk.SeparatorMenuItem ());
+        mi = Gtk.MenuItem.new_with_label ("Save");
+        mi.tooltip_text = "Save the kitty!";
+        this.menu.add (mi);
+        mi.connect ("activate", Lang.bind (this, this.save));*/
+
+        this.menu.show_all ();
+    },
+
+    save: function (o) {
+        let dlg = new Gtk.FileChooserDialog ({
+            title:"Select your filename", parent:window, action:Gtk.FileChooserAction.SAVE
+        });
+        dlg.add_button ("_Cancel", Gtk.ResponseType.CANCEL);
+        dlg.add_button ("_Save", Gtk.ResponseType.OK);
+        dlg.set_current_folder (GLib.get_user_special_dir (GLib.UserDirectory.DIRECTORY_PICTURES));
+        dlg.set_current_name ("kitty.gif");
+        if (dlg.run () == Gtk.ResponseType.OK) {
+            print ("OK");
+        }
     },
 
     fetch: function (url, agent, headers, callback) {
