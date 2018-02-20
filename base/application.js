@@ -27,11 +27,17 @@ const GdkPixbuf = imports.gi.GdkPixbuf;
 const Soup = imports.gi.Soup;
 const Lang = imports.lang;
 
+var Format = imports.format;
+String.prototype.format = Format.format;
+
 const APPDIR = get_appdir ();
 imports.searchPath.unshift(APPDIR);
 
 const APPNAME = "Hi, KITTY :)";
-const URL = "http://thecatapi.com/api/images/get?type=gif&size=med&ts=";
+
+const API = "http://thecatapi.com/api/images/get?type=%s&size=%s&ts=%d";
+var image_type = "gif";
+var image_size = "med";
 
 let theme_gui = APPDIR + "/data/theme/gtk.css";
 let cssp = null;
@@ -73,7 +79,7 @@ var KittyApplication = new Lang.Class ({
     },
 
     update: function() {
-        try { this.fetch (URL + new Date().getTime(), null,null,null);
+        try { this.fetch (new_image_url (), null,null,null);
         } catch (e) {print (e);}
     },
 
@@ -152,6 +158,10 @@ var KittyApplication = new Lang.Class ({
         }));
     }
 });
+
+function new_image_url () {
+    return API.format (image_type, image_size, new Date().getTime());
+}
 
 function get_css_provider () {
     let cssp = new Gtk.CssProvider ();
