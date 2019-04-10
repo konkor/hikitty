@@ -41,7 +41,6 @@ function enable () {
 }
 
 function disable () {
-    kindicator.remove_events ();
     kindicator.destroy ();
     kindicator = null;
 }
