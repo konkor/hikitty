@@ -39,6 +39,7 @@ const API = "http://thecatapi.com/api/images/get?type=%s&size=%s&ts=%d";
 var image_type = "gif";
 var image_size = "med";
 
+let cached = GLib.get_tmp_dir () + "/cached.gif"
 let theme_gui = APPDIR + "/data/theme/gtk.css";
 let cssp = null;
 let settings = null;
@@ -103,12 +104,12 @@ var KittyApplication = new Lang.Class ({
         this.picture = Gtk.Image.new_from_file (APPDIR + "/data/icons/get.gif");
         if (this.picture) ebox.add (this.picture);
 
-        window.connect ("focus-out-event", ()=>{if (!this.menu.visible) app.quit();});
-        ebox.connect ("button-press-event", Lang.bind (this, function (o, event) {
+        window.connect ("focus-out-event", () => { if (!this.menu.visible) app.quit(); });
+        ebox.connect ("button-press-event", (o, event) => {
             let [,button] = event.get_button();
             if (button == 3)
                 this.menu.popup (null, null, null, event.get_button(), event.get_time());
-        }));
+        });
     },
 
     build_menu: function () {
@@ -116,14 +117,14 @@ var KittyApplication = new Lang.Class ({
         let mi = Gtk.MenuItem.new_with_label ("Update");
         mi.tooltip_text = "Get a new one kitty!";
         this.menu.add (mi);
-        mi.connect ("activate", Lang.bind (this, function (o) {
-        this.update ();
-        }));
-        /*this.menu.add (new Gtk.SeparatorMenuItem ());
+        mi.connect ("activate", (o) => {
+          this.update ();
+        });
+        this.menu.add (new Gtk.SeparatorMenuItem ());
         mi = Gtk.MenuItem.new_with_label ("Save");
         mi.tooltip_text = "Save the kitty!";
         this.menu.add (mi);
-        mi.connect ("activate", Lang.bind (this, this.save));*/
+        mi.connect ("activate", this.save.bind (this));
 
         this.menu.show_all ();
     },
@@ -137,7 +138,16 @@ var KittyApplication = new Lang.Class ({
         dlg.set_current_folder (GLib.get_user_special_dir (GLib.UserDirectory.DIRECTORY_PICTURES));
         dlg.set_current_name ("kitty.gif");
         if (dlg.run () == Gtk.ResponseType.OK) {
-            print ("OK");
+            let filename = dlg.get_filename ();
+            let i = 0, fn = filename;
+            if (GLib.file_test (filename, GLib.FileTest.EXISTS))
+              while (GLib.file_test (fn, GLib.FileTest.EXISTS)) {
+                fn = filename.substring (0,filename.lastIndexOf (".")) + "_" + i + ".gif";
+                i++;
+              }
+            filename = fn;
+            let tmp = Gio.File.new_for_path (cached);
+            tmp.copy (Gio.File.new_for_path (filename), 0, null, null);
         }
     },
 
@@ -145,17 +155,20 @@ var KittyApplication = new Lang.Class ({
         callback = callback || null;
         agent = agent || "Hi, KITTY:) ver." + 1;
 
-        let session = new Soup.Session ({ user_agent: agent });
-        session.use_thread_context = true;
-        let request = session.request (url);
-        request.send_async (null, Lang.bind (this, function (o, res) {
-            try {
-                let stream = request.send_finish (res);
-                this.picture.pixbuf_animation = GdkPixbuf.PixbufAnimation.new_from_stream (stream, null);
-                window.resize (32, 32);
-            } catch (e) {print (e);}
-            if (callback) callback (res);
-        }));
+        let session = new Soup.SessionAsync({ user_agent: agent });
+        Soup.Session.prototype.add_feature.call (session, new Soup.ProxyResolverDefault());
+        let request = Soup.Message.new ("GET", url);
+        if (headers) headers.forEach (h=>{
+          request.request_headers.append (h[0], h[1]);
+        });
+        session.queue_message (request, (source, message) => {
+          GLib.file_set_contents (cached, message.response_body_data.get_data ());
+          print ("cached file:", cached);
+          this.picture.pixbuf_animation = GdkPixbuf.PixbufAnimation.new_from_file (cached);
+          if (callback) {
+            callback (message.response_body_data.get_data (), message.status_code);
+          }
+        });
     }
 });
 
