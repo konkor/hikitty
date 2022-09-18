@@ -19,6 +19,9 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+imports.gi.versions.Gtk  = "3.0";
+imports.gi.versions.Soup = "2.4";
+
 const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
 const Gio = imports.gi.Gio;
