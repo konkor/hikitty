@@ -20,7 +20,7 @@
  */
 
 imports.gi.versions.Gtk  = "3.0";
-imports.gi.versions.Soup = "2.4";
+imports.gi.versions.Soup = "3.0";
 
 const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
@@ -83,7 +83,9 @@ var KittyApplication = new Lang.Class ({
     },
 
     update: function() {
-        try { this.fetch (new_image_url (), null,null,null);
+        try { fetch (new_image_url (), null,null, () => {
+            this.picture.pixbuf_animation = GdkPixbuf.PixbufAnimation.new_from_file (cached);
+          });
         } catch (e) {print (e);}
     },
 
@@ -111,7 +113,7 @@ var KittyApplication = new Lang.Class ({
         ebox.connect ("button-press-event", (o, event) => {
             let [,button] = event.get_button();
             if (button == 3)
-                this.menu.popup (null, null, null, event.get_button(), event.get_time());
+              this.menu.popup_at_widget (o, Gdk.Gravity.NORTH, Gdk.Gravity.EAST, event);
         });
     },
 
@@ -152,28 +154,34 @@ var KittyApplication = new Lang.Class ({
             let tmp = Gio.File.new_for_path (cached);
             tmp.copy (Gio.File.new_for_path (filename), 0, null, null);
         }
-    },
-
-    fetch: function (url, agent, headers, callback) {
-        callback = callback || null;
-        agent = agent || "Hi, KITTY:) ver." + 1;
-
-        let session = new Soup.SessionAsync({ user_agent: agent });
-        Soup.Session.prototype.add_feature.call (session, new Soup.ProxyResolverDefault());
-        let request = Soup.Message.new ("GET", url);
-        if (headers) headers.forEach (h=>{
-          request.request_headers.append (h[0], h[1]);
-        });
-        session.queue_message (request, (source, message) => {
-          GLib.file_set_contents (cached, message.response_body_data.get_data ());
-          print ("cached file:", cached);
-          this.picture.pixbuf_animation = GdkPixbuf.PixbufAnimation.new_from_file (cached);
-          if (callback) {
-            callback (message.response_body_data.get_data (), message.status_code);
-          }
-        });
     }
 });
+
+
+function fetch (url, agent, headers, callback) {
+    callback = callback || null;
+    agent = agent || "Hi, KITTY:) ver." + 1;
+
+    let session = new Soup.Session ();
+    session.user_agent = agent;
+    //Soup.Session.prototype.add_feature.call (session, new Soup.ProxyResolverDefault());
+    let request = Soup.Message.new ("GET", url);
+    if (headers) headers.forEach ( h => {
+      request.request_headers.append (h[0], h[1]);
+    });
+    try {
+      session.send_and_read_async (request, 100, null, (session, res) => {
+        let response = session.send_and_read_finish (res);
+        if (response) {
+          let data = response.get_data ();
+          if (data) GLib.file_set_contents (cached, data);
+          if (callback) callback (data);
+        };
+      });
+    } catch (e) {
+      error ("fetch", `Error making HTTP request: ${e.message}`);
+    }
+}
 
 function new_image_url () {
     return API.format (image_type, image_size, new Date().getTime());
